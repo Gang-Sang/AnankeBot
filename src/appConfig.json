@@ -1,0 +1,10 @@
+{
+    "publicKey": "test",
+    "privateKey": "test",
+    "passwordHash": "",
+    "apiUrlBase": "https://api.avax-test.network/",
+    "daiTokenAddress": "test",
+    "platforms": [
+        { "name": "test", "stakingContract": "0x136Acd46C134E8269052c62A67042D6bDeDde3C9", "tokenContract": "test" }
+    ]
+}

@@ -15,7 +15,7 @@
     "build": "npm run clean && npm run lint && tsc",
     "changelog": "conventional-changelog -p angular -u",
     "changelog:update": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md",
-    "clean": "(del /q .nyc_output || VER>NUL) && (del /q coverage || VER>NUL) && (del /q dist || VER>NUL)",
+    "clean": "(del /q .nyc_output || VER>NUL) && (del /q coverage || VER>NUL) && (del /q /s dist || VER>NUL)",
     "clean:all": "npm run clean && (del ./node_modules || VER>NUL)",
     "cover": "nyc npm run test",
     "cover:check": "nyc --check-coverage npm run test",
@@ -24,7 +24,8 @@
     "preversion": "npm run build && npm run cover:check",
     "postversion": "git push && git push --tags",
     "prepare": "npm run build",
-    "start": "npm run build && node ./dist/index.js",
+    "setup": "node ./dest/setup.js",
+    "start": "node ./dist/index.js",
     "test": "mocha",
     "upgrade": "npx npm-check -u",
     "version": "npm run build && npm run changelog:update"
