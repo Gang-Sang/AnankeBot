@@ -1,10 +1,19 @@
 {
-    "publicKey": "test",
+    "publicKey": "0xb83A6f8fbFBc4a4d875407e58dBd1793b986e235",
     "privateKey": "test",
     "passwordHash": "",
-    "apiUrlBase": "https://api.avax-test.network/",
-    "daiTokenAddress": "test",
+    "apiUrlBase": "https://rpc.ftm.tools/",
+    "daiTokenAddress": "0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E",
+	"numOfBlockPreBuy": 1000,
+	"numOfBlocksMin": 100,
+	"verbose": true,
     "platforms": [
-        { "name": "test", "stakingContract": "0x136Acd46C134E8269052c62A67042D6bDeDde3C9", "tokenContract": "test" }
+        { 
+			"id": 1,
+            "name": "Spartacus",
+            "stakingContract": "0x9863056B4Bdb32160A70107a6797dD06B56E8137",
+            "tokenContract": "0x5602df4A94eB6C680190ACCFA2A475621E0ddBdc ",
+			"daiLPPoolContract": "0xFa5a5F0bC990Be1D095C5385Fff6516F6e03c0a7"
+        }
     ]
 }

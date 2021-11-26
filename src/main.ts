@@ -1,13 +1,24 @@
+import Web3 from 'web3';
+import { Mutex } from 'async-mutex';
 import { log } from './common/logger';
-import { Avalanche } from "avalanche";
-import config from "./appConfig.json";
+import config from './appConfig.json';
+import { getPlatformToExecute } from './main/platforms';
+import { getBalace } from './main/erc20';
+
+const mutex = new Mutex();
+let currentlyRunning = false;
 
 export const mainProgramLoop = async () => {
 	const runTill = true;
-    const avalanche = new Avalanche(config.apiUrlBase, 80, "https");
+	const web3 = new Web3(config.apiUrlBase);
 
 	while (runTill) {
-		mainFunction(avalanche);
+		if (await isCurrentlyRunning()) {
+			await sleep(10 * 1000);
+			continue;
+		}
+
+		mainFunction(web3);
 		await sleep(10 * 1000);
 	}
 }
@@ -16,15 +27,44 @@ async function sleep(msec: number) {
 	return new Promise(resolve => setTimeout(resolve, msec));
 }
 
-function mainFunction(client: Avalanche) {
+async function SetCurrentlyRunning(value: boolean) {
+	const release = await mutex.acquire();
+	try {
+		currentlyRunning = value;
+	} finally {
+		release();
+	}
+}
+
+async function isCurrentlyRunning() : Promise<boolean> {
+	const release = await mutex.acquire();
+	try {
+		return currentlyRunning;
+	} finally {
+		release();
+	}
+}
+
+async function mainFunction(web3: Web3) {
+	await SetCurrentlyRunning(true);
+
+	const currentBlock = await web3.eth.getBlockNumber();
+	log(`current block-${currentBlock}`);
+
+	const executePlatform = getPlatformToExecute(web3, currentBlock);
+	if(!executePlatform) { return; }
+
+	//start the buy process
+	const daiBalance = await getBalace(web3, config.daiTokenAddress);
+
+	if (daiBalance <= 0 ) {
+		log(`dai balance not enough to trade, exiting. Balance - ${daiBalance}`);
+		return;
+	}
+
+	//trade dai
+
 	
-
-	//check platforms times
-
-	//check dia balance
-
-	//if platform rebase time is soon buy token
-
 	//stake token
 
 	//watch for rebase
@@ -32,4 +72,8 @@ function mainFunction(client: Avalanche) {
 	//unstake token
 
 	//convert to dai
+	
+	await SetCurrentlyRunning(false);
 }
+
+
