@@ -8,6 +8,7 @@ export interface Platform {
 	name: string;
 	stakingContract: string;
 	tokenContract: string;
+    daiLPPoolContract: string;
 	endBlock: number;
 	blocksToRebase: number;
 }
@@ -39,7 +40,7 @@ export const getValidPlatforms = async (web3: Web3, currentBlock: number) => {
 		const platform = config.platforms[i]
 		const abi = getStakingAbi(platform.id);
 		if(!abi) { return; }
-		const myContract = new web3.eth.Contract(abi, platform.stakingContract);
+		const myContract = new web3.eth.Contract(abi as any, platform.stakingContract);
 		const epochResult = await (myContract as any).methods?.epoch().call();
 
 		const distribute = parseInt(epochResult.distribute);

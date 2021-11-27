@@ -4,6 +4,7 @@ import { log } from './common/logger';
 import config from './appConfig.json';
 import { getPlatformToExecute } from './main/platforms';
 import { getBalace } from './main/erc20';
+import { getLiquidityReserves } from './main/spookySwap';
 
 const mutex = new Mutex();
 let currentlyRunning = false;
@@ -51,16 +52,23 @@ async function mainFunction(web3: Web3) {
 	const currentBlock = await web3.eth.getBlockNumber();
 	log(`current block-${currentBlock}`);
 
-	const executePlatform = getPlatformToExecute(web3, currentBlock);
+	const executePlatform = await getPlatformToExecute(web3, currentBlock);
 	if(!executePlatform) { return; }
 
 	//start the buy process
 	const daiBalance = await getBalace(web3, config.daiTokenAddress);
-
 	if (daiBalance <= 0 ) {
 		log(`dai balance not enough to trade, exiting. Balance - ${daiBalance}`);
 		return;
 	}
+
+    //check rugpull metrics
+    const reserves = await getLiquidityReserves(web3, executePlatform);
+    if(reserves[1] < 1000000)
+    {
+        log(`Dai in LP balance too low, might be a rugpull. Dai Liquidity ${reserves[1]}`);
+        return;
+    }
 
 	//trade dai
 
