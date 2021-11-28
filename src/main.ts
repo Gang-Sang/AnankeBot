@@ -12,6 +12,7 @@ let currentlyRunning = false;
 export const mainProgramLoop = async () => {
 	const runTill = true;
 	const web3 = new Web3(config.apiUrlBase);
+	web3.eth.defaultAccount = config.publicKey;
 
 	while (runTill) {
 		if (await isCurrentlyRunning()) {
@@ -73,7 +74,7 @@ async function mainFunction(web3: Web3) {
 	}
 
 	//trade dai
-	if(await buyDai(web3, executePlatform, currentBlock, 100, reserves)) {
+	if(await buyDai(web3, executePlatform, 100, reserves)) {
 		log('Dai buy transaction sucessful');
 	} else {
 		log('Dai buy transaction failed');
@@ -88,21 +89,33 @@ async function mainFunction(web3: Web3) {
 
 	//convert to dai
 	
-	await SetCurrentlyRunning(false);
+	//await SetCurrentlyRunning(false);
 }
 
-const buyDai = async (web3: Web3, platform: Platform, currentBlock: number, daiAmount: number, reserves: number[]) => {
-	const loopLimit = 120;
+const buyDai = async (web3: Web3, platform: Platform, daiAmount: number, reserves: number[]) => {
+	if(config.verbose) { log(`Apptempt to buy ${daiAmount} dai`); }
+
+	const loopLimit = 60;
 	let loops = 0;
-	let reciept = await swapDaiForTokens(web3, platform, currentBlock, daiAmount, reserves);
+	let reciept = await swapDaiForTokens(web3, platform, daiAmount, reserves);
 
 	if(config.verbose) {
 		log(`Dai buy transaction created - hash - ${reciept.transactionHash}`);
 	}
+	if(config.verbose) {
+		log(`current reciept - ${JSON.stringify(reciept)}`);
+	}
+
 
 	while (loops < loopLimit) {
+		log('loop');
 		await sleep(10 * 1000);
+		log('after sleep');
 		reciept = await web3.eth.getTransactionReceipt(reciept.transactionHash);
+
+		if(config.verbose) {
+			log(`current reciept - ${JSON.stringify(reciept)}`);
+		}
 
 		if(reciept?.blockNumber) {
 			if(reciept.status == true) {

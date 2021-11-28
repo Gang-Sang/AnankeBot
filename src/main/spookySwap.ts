@@ -11,16 +11,20 @@ export const getLiquidityReserves = async (web3: Web3, platform: Platform) => {
 	return [reserves._reserve0 / Math.pow(10, 9), reserves._reserve1 / Math.pow(10, 18)];
 }
 
-export const swapDaiForTokens = async (web3: Web3, platform: Platform, currentBlock: number, daiAmount: number, reserves: number[]) => {
+export const swapDaiForTokens = async (web3: Web3, platform: Platform, daiAmount: number, reserves: number[]) => {
 	const currentPrice = reserves[1] / reserves[0];
-	const minOut = ((daiAmount / currentPrice) * .999) * Math.pow(10, platform.numberOfDecimals);
+	const minOut = Math.floor(((daiAmount / currentPrice) * .99) * Math.pow(10, platform.numberOfDecimals)).toString();
 	const path = [config.daiTokenAddress, platform.tokenContract];
-	const deadline = currentBlock + (config.numOfBlockPreBuy / 2);
+	const deadline = (Date.now() + (5 * 60 * 1000)).toString();//5 mins
 	const routerContract = new web3.eth.Contract(spookyRouterAbi as any, config.spookRouterAddress);
+	const daiAmountStr = (daiAmount * Math.pow(10, 18)).toString();
+	routerContract.defaultAccount = config.publicKey;
 
-	const callData = await routerContract.methods.swapExactTokensForTokens(daiAmount * Math.pow(10, 18), minOut, path, config.publicKey, deadline);
-	const gasEstimate = 1.2 * (await routerContract.methods.swapExactTokensForTokens(daiAmount * Math.pow(10, 18), minOut, path, config.publicKey, deadline).estimateGas());
-	const gasPrice = parseFloat(await web3.eth.getGasPrice()) * 1.2;
+	const methodSig = await routerContract.methods.swapExactTokensForTokens(daiAmountStr, minOut, path, config.publicKey, deadline);
+	const callData = methodSig.encodeABI();
+	const gasEstimate = Math.floor((await methodSig.estimateGas({ from : config.publicKey })) * 1.1).toString();
+	const gasPrice = Math.floor(parseFloat(await web3.eth.getGasPrice()) * 1.1).toString();
+
 	const transaction: TransactionConfig = {
 		from: config.publicKey,
 		to: config.spookRouterAddress,
@@ -35,6 +39,6 @@ export const swapDaiForTokens = async (web3: Web3, platform: Platform, currentBl
 	return await web3.eth.sendSignedTransaction(rawTx);
 }
 
-export const swapTokensForDai = (web3: Web3, platform: Platform) => {
+export const swapTokensForDai = (web3: Web3, platform: Platform, daiAmount: number, reserves: number[]) => {
 	return null;
 }

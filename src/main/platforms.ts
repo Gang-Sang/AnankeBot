@@ -1,7 +1,7 @@
 import Web3 from 'web3';
 import config from '../appConfig.json';
 import { getStakingAbi } from '../abi/abiFactory';
-import { log } from '../common/logger';
+//import { log } from '../common/logger';
 
 export interface Platform {
 	id: number;
@@ -11,6 +11,7 @@ export interface Platform {
     daiLPPoolContract: string;
 	endBlock: number;
 	blocksToRebase: number;
+    numberOfDecimals: number;
 }
 
 export const getPlatformToExecute = async (web3: Web3, currentBlock: number) => {
@@ -20,6 +21,8 @@ export const getPlatformToExecute = async (web3: Web3, currentBlock: number) => 
 		return null; 
 	}
 
+	return platforms[0]; 
+/*
 	const withinBlockLimit = platforms.filter(p => p.blocksToRebase > config.numOfBlocksMin);
 
 	if(withinBlockLimit.length > 0 && withinBlockLimit[0].blocksToRebase < config.numOfBlockPreBuy) {
@@ -31,6 +34,7 @@ export const getPlatformToExecute = async (web3: Web3, currentBlock: number) => 
 	}
 	
 	return null;
+    */
 }
 
 export const getValidPlatforms = async (web3: Web3, currentBlock: number) => {
