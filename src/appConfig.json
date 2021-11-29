@@ -1,19 +1,21 @@
 {
-    "publicKey": "0xb83A6f8fbFBc4a4d875407e58dBd1793b986e235",
+    "publicKey": "test",
     "privateKey": "test",
     "passwordHash": "",
     "apiUrlBase": "https://rpc.ftm.tools/",
     "daiTokenAddress": "0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E",
     "spookRouterAddress": "0xF491e7B69E4244ad4002BC14e878a34207E38c29",
-	"numOfBlockPreBuy": 1000,
-	"numOfBlocksMin": 100,
+	"numOfBlockPreBuy": 300,
+	"numOfBlocksMin": 60,
 	"verbose": true,
     "platforms": [
         { 
 			"id": 1,
             "name": "Spartacus",
             "stakingContract": "0x9863056B4Bdb32160A70107a6797dD06B56E8137",
+            "stakingHelperContract": "0xbd39045344cD9b8FB4622959725D65e49dB2D090",
             "tokenContract": "0x5602df4A94eB6C680190ACCFA2A475621E0ddBdc",
+            "stakingTokenContract": "0x8e2549225E21B1Da105563D419d5689b80343E01",
 			"daiLPPoolContract": "0xFa5a5F0bC990Be1D095C5385Fff6516F6e03c0a7",
             "numberOfDecimals": 9
         }

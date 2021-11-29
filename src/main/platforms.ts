@@ -1,13 +1,15 @@
 import Web3 from 'web3';
 import config from '../appConfig.json';
-import { getStakingAbi } from '../abi/abiFactory';
-//import { log } from '../common/logger';
+import stakingAbi from '../abi/staking.json';
+import { log } from '../common/logger';
 
 export interface Platform {
 	id: number;
 	name: string;
 	stakingContract: string;
+    stakingHelperContract: string;
 	tokenContract: string;
+    stakingTokenContract: string;
     daiLPPoolContract: string;
 	endBlock: number;
 	blocksToRebase: number;
@@ -21,30 +23,24 @@ export const getPlatformToExecute = async (web3: Web3, currentBlock: number) => 
 		return null; 
 	}
 
-	return platforms[0]; 
-/*
-	const withinBlockLimit = platforms.filter(p => p.blocksToRebase > config.numOfBlocksMin);
+	const withinBlockLimit = platforms.filter(p => p.blocksToRebase > config.numOfBlocksMin && p.blocksToRebase < config.numOfBlockPreBuy);
 
-	if(withinBlockLimit.length > 0 && withinBlockLimit[0].blocksToRebase < config.numOfBlockPreBuy) {
+	if(withinBlockLimit.length > 0) {
 		return withinBlockLimit[0];
 	}
-
-	if(withinBlockLimit.length > 0 && config.verbose) {
-		log(`No Platform to buy. Closest is ${withinBlockLimit[0].name} at block ${withinBlockLimit[0].blocksToRebase}`);
+	if(config.verbose) {
+		log(`No Platform in limits to buy. Closest is ${platforms[0].name} at block ${platforms[0].endBlock} - ${platforms[0].blocksToRebase} blocks to go`);
 	}
 	
 	return null;
-    */
 }
 
 export const getValidPlatforms = async (web3: Web3, currentBlock: number) => {
 	const platforms : Platform[] = [];
 
 	for(let i = 0; i < config.platforms.length; i++) {
-		const platform = config.platforms[i]
-		const abi = getStakingAbi(platform.id);
-		if(!abi) { return; }
-		const myContract = new web3.eth.Contract(abi as any, platform.stakingContract);
+		const platform = config.platforms[i];
+		const myContract = new web3.eth.Contract(stakingAbi as any, platform.stakingContract);
 		const epochResult = await (myContract as any).methods?.epoch().call();
 
 		const distribute = parseInt(epochResult.distribute);

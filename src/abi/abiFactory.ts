@@ -1,9 +1,9 @@
-import spaStakingAbi from './spaStaking.json';
+import stakingAbi from './staking.json';
 
 export const getStakingAbi = (id: number) => {
 	switch (id) {
 	case 1:
-		return spaStakingAbi;
+		return stakingAbi;
 	default:
 		return null;
 	}

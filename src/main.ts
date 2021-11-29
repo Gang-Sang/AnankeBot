@@ -1,10 +1,11 @@
 import Web3 from 'web3';
 import { Mutex } from 'async-mutex';
 import { log } from './common/logger';
+import { getBalace } from './common/erc20';
 import config from './appConfig.json';
-import { Platform, getPlatformToExecute } from './main/platforms';
-import { getBalace } from './main/erc20';
-import { getLiquidityReserves, swapDaiForTokens } from './main/spookySwap';
+import { getPlatformToExecute } from './main/platforms';
+import { getLiquidityReserves } from './main/spookySwap';
+import { executeBuySell } from './main/buySellRebase';
 
 const mutex = new Mutex();
 let currentlyRunning = false;
@@ -16,12 +17,12 @@ export const mainProgramLoop = async () => {
 
 	while (runTill) {
 		if (await isCurrentlyRunning()) {
-			await sleep(10 * 1000);
+			await sleep(30 * 1000);
 			continue;
 		}
 
 		await mainFunction(web3);
-		await sleep(10 * 1000);
+		await sleep(30 * 1000);
 	}
 }
 
@@ -56,8 +57,6 @@ async function mainFunction(web3: Web3) {
 	const executePlatform = await getPlatformToExecute(web3, currentBlock);
 	if(!executePlatform) { return; }
 
-	log(`Starting buying cycle for ${executePlatform.name}`);
-
 	//start the buy process
 	const daiBalance = await getBalace(web3, config.daiTokenAddress);
 	if (daiBalance <= 0 ) {
@@ -73,61 +72,8 @@ async function mainFunction(web3: Web3) {
 		return;
 	}
 
-	//trade dai
-	if(await buyDai(web3, executePlatform, 100, reserves)) {
-		log('Dai buy transaction sucessful');
-	} else {
-		log('Dai buy transaction failed');
-		return;
-	}
+	await executeBuySell(web3, executePlatform, reserves);
 
-	//stake token
-                                                                                               
-	//watch for rebase
-
-	//unstake token
-
-	//convert to dai
-	
-	//await SetCurrentlyRunning(false);
+	await SetCurrentlyRunning(false);
 }
 
-const buyDai = async (web3: Web3, platform: Platform, daiAmount: number, reserves: number[]) => {
-	if(config.verbose) { log(`Apptempt to buy ${daiAmount} dai`); }
-
-	const loopLimit = 60;
-	let loops = 0;
-	let reciept = await swapDaiForTokens(web3, platform, daiAmount, reserves);
-
-	if(config.verbose) {
-		log(`Dai buy transaction created - hash - ${reciept.transactionHash}`);
-	}
-	if(config.verbose) {
-		log(`current reciept - ${JSON.stringify(reciept)}`);
-	}
-
-
-	while (loops < loopLimit) {
-		log('loop');
-		await sleep(10 * 1000);
-		log('after sleep');
-		reciept = await web3.eth.getTransactionReceipt(reciept.transactionHash);
-
-		if(config.verbose) {
-			log(`current reciept - ${JSON.stringify(reciept)}`);
-		}
-
-		if(reciept?.blockNumber) {
-			if(reciept.status == true) {
-				return true;
-			} else {
-				
-				return false;
-			}
-		}
-		loops++;
-	}
-
-	log('Dai buy transaction status unknown. Exiting, manually check transaction');
-	throw 'Dai buy transaction status unknown';
-}
