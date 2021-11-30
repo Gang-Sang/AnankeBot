@@ -27,7 +27,6 @@ async function mainFunction(web3: Web3) {
 	const executePlatform = await getPlatformToExecute(web3, currentBlock);
 	if(!executePlatform) { return; }
 
-	//start the buy process
 	const daiBalance = await getBalace(web3, config.daiTokenAddress);
 	if (daiBalance <= 0 ) {
 		log(`dai balance not enough to trade, exiting. Balance - ${daiBalance}`);
@@ -36,7 +35,7 @@ async function mainFunction(web3: Web3) {
 
 	//check rugpull metrics
 	const reserves = await getLiquidityReserves(web3, executePlatform);
-	if(reserves[1] < 1000000)
+	if(reserves[1] < (1000000 * Math.pow(10, 18)))
 	{
 		log(`Dai in LP balance too low, might be a rugpull. Dai Liquidity ${reserves[1]}`);
 		return;

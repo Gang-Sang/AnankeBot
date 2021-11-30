@@ -17,7 +17,9 @@
             "tokenContract": "0x5602df4A94eB6C680190ACCFA2A475621E0ddBdc",
             "stakingTokenContract": "0x8e2549225E21B1Da105563D419d5689b80343E01",
 			"daiLPPoolContract": "0xFa5a5F0bC990Be1D095C5385Fff6516F6e03c0a7",
-            "numberOfDecimals": 9
+            "numberOfDecimals": 9,
+			"priceFloor": 100.00,
+			"enabled": true
         }
     ]
 }
