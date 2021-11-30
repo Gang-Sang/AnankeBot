@@ -32,7 +32,7 @@ export const executeBuySell = async (web3: Web3, platform: Platform, reserves: n
 	}
                                                                                                
 	//watch for rebase
-	const newRebaseBlock = watchForRebase(web3, platform);
+	const newRebaseBlock = await watchForRebase(web3, platform);
 	if(config.verbose) {
 		log(`Rebase of ${platform.name} complete. Next rebase on ${newRebaseBlock}`);
 	}

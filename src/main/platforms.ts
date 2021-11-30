@@ -20,6 +20,7 @@ export const getPlatformToExecute = async (web3: Web3, currentBlock: number) => 
 	const platforms = await getValidPlatforms(web3, currentBlock);
 
 	if(!platforms || platforms.length == 0) { 
+		log('No valid plafroms found');
 		return null; 
 	}
 
@@ -42,13 +43,14 @@ export const getValidPlatforms = async (web3: Web3, currentBlock: number) => {
 		const platform = config.platforms[i];
 		const myContract = new web3.eth.Contract(stakingAbi as any, platform.stakingContract);
 		const epochResult = await (myContract as any).methods?.epoch().call();
+		const warmupPeriod: number = await (myContract as any).methods?.warmupPeriod().call();
 
 		const distribute = parseInt(epochResult.distribute);
 		const endBlock = parseInt(epochResult.endBlock);
 
 		//TODO: add conditions to check reward %
 		//TODO: cache results to save api calls when we know we're not playing this block
-		if(distribute > 0 && endBlock > currentBlock)
+		if(warmupPeriod == 0 && distribute > 0 && endBlock > currentBlock)
 		{
 			platforms.push({
 				...platform,

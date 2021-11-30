@@ -10,6 +10,7 @@
 	"rules": {
 		"indent": ["error", "tab"],
 		"quotes": ["error", "single"],
-		"@typescript-eslint/no-explicit-any": "off"
+		"@typescript-eslint/no-explicit-any": "off",
+        "no-constant-condition": ["error", { "checkLoops": false }]
 	}
 }

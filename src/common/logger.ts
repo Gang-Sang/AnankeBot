@@ -11,6 +11,6 @@ export const log = (message: string) => {
 		fs.mkdirSync(logDir);
 	}
 
-	fs.appendFileSync(filename, formattedMessage);
+	fs.appendFileSync(filename, `${formattedMessage}\r\n`);
 	console.log(formattedMessage);
 }
