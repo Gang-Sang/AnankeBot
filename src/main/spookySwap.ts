@@ -11,17 +11,17 @@ export const getLiquidityReserves = async (web3: Web3, platform: Platform) => {
 	return [reserves._reserve0, reserves._reserve1];
 }
 
-export const swapDaiForTokens = async (web3: Web3, platform: Platform, daiAmount: number, reserves: number[]) => {
+export const swapDaiForTokens = async (web3: Web3, platform: Platform, daiAmount: bigint, reserves: bigint[]) => {
 	const currentPrice = reserves[platform.daiReservePosition] / reserves[platform.tokenReservePosition];
-	const minOut = Math.floor((daiAmount / currentPrice) * .99).toString();
+	const minOut = (((daiAmount / currentPrice) * 99n) / 100n).toString();
 	const path = [config.daiTokenAddress, platform.tokenContract];
 
 	return await sendSwapTransaction(web3, platform, daiAmount.toString(), minOut, path);
 }
 
-export const swapTokensForDai = async (web3: Web3, platform: Platform, tokenAmount: number, reserves: number[]) => {
+export const swapTokensForDai = async (web3: Web3, platform: Platform, tokenAmount: bigint, reserves: bigint[]) => {
 	const currentPrice = reserves[platform.tokenReservePosition] / reserves[platform.daiReservePosition];
-	const minOut = Math.floor((tokenAmount / currentPrice) * .99).toString();
+	const minOut = (((tokenAmount / currentPrice) * 97n) / 100n).toString();
 	const path = [platform.tokenContract, config.daiTokenAddress];
 
 	return await sendSwapTransaction(web3, platform, tokenAmount.toString(), minOut, path);

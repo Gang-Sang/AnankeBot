@@ -53,7 +53,7 @@ async function mainFunction(web3: Web3, currentBlock: number): Promise<Platform 
 		return null;
 	}
 
-	const daiToTurn = Math.floor(daiBalance * .95);
+	const daiToTurn = (daiBalance * 90n) / 100n;
 
 	await executeBuySell(web3, executePlatform, daiToTurn);
 

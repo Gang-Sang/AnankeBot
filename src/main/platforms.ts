@@ -19,7 +19,7 @@ export interface Platform {
     numberOfDecimals: number;
     priceFloor: number;
     enabled: boolean;
-    lpReserves: number[];
+    lpReserves: bigint[];
     readyToRun?: boolean;
 }
 
@@ -89,14 +89,15 @@ const getValidPlatforms = async (web3: Web3, currentBlock: number) => {
 //check rugpull metrics
 const runPlatformChecks = async (web3: Web3, platform: Platform) : Promise<Platform | null> => {
 	const reserves = await getLiquidityReserves(web3, platform);
+	const lpReserves = [BigInt(reserves[0]), BigInt(reserves[1])]
     
-	if(reserves[platform.daiReservePosition] < (500000 * Math.pow(10, 18)))
+	if(lpReserves[platform.daiReservePosition] < (500000 * Math.pow(10, 18)))
 	{
 		log(`Dai in LP balance too low, might be a rugpull. Check liquidity on ${platform.name}`);
 		return null;
 	}
 
-	const price = (reserves[platform.daiReservePosition] / Math.pow(10, 18)) / (reserves[platform.tokenReservePosition] / Math.pow(10, platform.numberOfDecimals));
+	const price = (lpReserves[platform.daiReservePosition] / BigInt(Math.pow(10, 18))) / (lpReserves[platform.tokenReservePosition] / BigInt(Math.pow(10, platform.numberOfDecimals)));
 
 	if(price < platform.priceFloor)
 	{
@@ -106,6 +107,6 @@ const runPlatformChecks = async (web3: Web3, platform: Platform) : Promise<Platf
 
 	return {
 		...platform,
-		lpReserves: [reserves[0] as number, reserves[1] as number]
+		lpReserves: lpReserves
 	};
 }

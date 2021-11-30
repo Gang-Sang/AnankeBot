@@ -6,16 +6,16 @@ import { sendContractCall } from './transactionHelper';
 export const getBalace = async (web3: Web3, contractAddress: string) => {
 	const myContract = new web3.eth.Contract(erc20Abi as any, contractAddress);
 	const balance = await (myContract as any).methods.balanceOf(config.publicKey).call();
-	return parseInt(balance);
+	return BigInt(balance);
 };
 
 export const getAllowance = async (web3: Web3, contractAddress: string, spender: string) => {
 	const myContract = new web3.eth.Contract(erc20Abi as any, contractAddress);
 	const balance = await (myContract as any).methods.allowance(config.publicKey, spender).call();
-	return parseInt(balance);
+	return BigInt(balance);
 };
 
-export const approve = async (web3: Web3, contractAddress: string, spender: string, amount: number) => {
+export const approve = async (web3: Web3, contractAddress: string, spender: string, amount: bigint) => {
 	const myContract = new web3.eth.Contract(erc20Abi as any, contractAddress);
 	const methodSig = await myContract.methods.approve(spender, amount.toString());
 

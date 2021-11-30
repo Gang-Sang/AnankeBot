@@ -10,7 +10,7 @@ import { stakeAllTokens, unstakeAllTokens } from './staking';
 
 const waitLoopLimit = 60;
 
-export const executeBuySell = async (web3: Web3, platform: Platform, daiAmount: number) => {
+export const executeBuySell = async (web3: Web3, platform: Platform, daiAmount: bigint) => {
 	log(`Starting buy/sell cycle for ${platform.name}`);
 
 	//buy token
@@ -59,14 +59,14 @@ export const executeBuySell = async (web3: Web3, platform: Platform, daiAmount: 
 	log(`Ending buy/sell cycle for ${platform.name}`);
 }
 
-const buyToken = async (web3: Web3, platform: Platform, daiAmount: number, reserves: number[]) => {
+const buyToken = async (web3: Web3, platform: Platform, daiAmount: bigint, reserves: bigint[]) => {
 	log('buy token');
 	await checkAllowanceAndApprove(web3, config.daiTokenAddress, config.spookRouterAddress, daiAmount);
 	const receipt = await swapDaiForTokens(web3, platform, daiAmount, reserves);
 	return await waitForTransaction(web3, receipt)
 }
 
-const sellAllTokensForDai = async (web3: Web3, platform: Platform, reserves: number[]) => {
+const sellAllTokensForDai = async (web3: Web3, platform: Platform, reserves: bigint[]) => {
 	log('sell all token');
 	const platformBalance = await getBalace(web3, platform.tokenContract);
 	await checkAllowanceAndApprove(web3, platform.tokenContract, config.spookRouterAddress, platformBalance);
@@ -76,24 +76,24 @@ const sellAllTokensForDai = async (web3: Web3, platform: Platform, reserves: num
 
 const stakePlatform = async (web3: Web3, platform: Platform) => {
 	log('stake token');
-	await checkAllowanceAndApprove(web3, platform.tokenContract, platform.stakingHelperContract, 3 * Math.pow(10, platform.numberOfDecimals));
+	await checkAllowanceAndApprove(web3, platform.tokenContract, platform.stakingHelperContract, BigInt(3 * Math.pow(10, platform.numberOfDecimals)));
 	const receipt = await stakeAllTokens(web3, platform);
 	return await waitForTransaction(web3, receipt)
 }
 
 const unstakePlatform = async (web3: Web3, platform: Platform) => {
 	log('unstake token');
-	await checkAllowanceAndApprove(web3, platform.stakingTokenContract, platform.stakingContract, 3 * Math.pow(10, platform.numberOfDecimals));
+	await checkAllowanceAndApprove(web3, platform.stakingTokenContract, platform.stakingContract, BigInt(3 * Math.pow(10, platform.numberOfDecimals)));
 	const receipt = await unstakeAllTokens(web3, platform);
 	return await waitForTransaction(web3, receipt)
 }
 
-const checkAllowanceAndApprove = async (web3: Web3, contract: string, spender: string, amount: number) => {
+const checkAllowanceAndApprove = async (web3: Web3, contract: string, spender: string, amount: bigint) => {
 	const allowance = await getAllowance(web3, contract, spender);
 
 	if(amount > allowance) {
 		log('Not enough approved funds, sending approve now')
-		const approveReceipt = await approve(web3, contract, spender, amount * 4);
+		const approveReceipt = await approve(web3, contract, spender, amount * BigInt(4));
 		if(!(await waitForTransaction(web3, approveReceipt))) {
 			throw `Approve failed, manually check status of tx ${approveReceipt?.transactionHash}`;
 		}
