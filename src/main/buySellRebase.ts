@@ -10,11 +10,11 @@ import { stakeAllTokens, unstakeAllTokens } from './staking';
 
 const waitLoopLimit = 60;
 
-export const executeBuySell = async (web3: Web3, platform: Platform) => {
+export const executeBuySell = async (web3: Web3, platform: Platform, daiAmount: number) => {
 	log(`Starting buy/sell cycle for ${platform.name}`);
 
 	//buy token
-	const buyReceipt = await buyToken(web3, platform, 100 * Math.pow(10, 18), platform.lpReserves);
+	const buyReceipt = await buyToken(web3, platform, daiAmount, platform.lpReserves);
 	if(buyReceipt) {
 		log('Token buy transaction sucessful');
 		log(JSON.stringify(buyReceipt));
@@ -121,7 +121,7 @@ const watchForRebase = async (web3: Web3, platform: Platform) => {
 const waitForTransaction = async (web3: Web3, receipt: TransactionReceipt) => {
 	let loops = 0;
 	let retrieveReciept: TransactionReceipt;
-
+    
 	while (loops < waitLoopLimit) {
 		retrieveReciept = await web3.eth.getTransactionReceipt(receipt.transactionHash);
 

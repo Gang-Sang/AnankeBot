@@ -12,6 +12,8 @@ export interface Platform {
 	tokenContract: string;
     stakingTokenContract: string;
     daiLPPoolContract: string;
+    daiReservePosition: number,
+    tokenReservePosition: number,
 	endBlock: number;
 	blocksToRebase: number;
     numberOfDecimals: number;
@@ -32,6 +34,10 @@ export const getSoonestValidPlatform = async (web3: Web3, currentBlock: number):
 
 	for(let i = 0; i < platforms.length; i++) {
 		const eligiblePlatform = await runPlatformChecks(web3, platforms[i]);
+		/*
+		if(eligiblePlatform)
+			eligiblePlatform.readyToRun = true;
+		return eligiblePlatform;*/
 		
 		if (eligiblePlatform) {
 			if (eligiblePlatform.blocksToRebase <= config.numOfBlockPreBuy && eligiblePlatform.blocksToRebase >= config.numOfBlocksMin) {
@@ -65,7 +71,7 @@ const getValidPlatforms = async (web3: Web3, currentBlock: number) => {
 		if(epochResult.distribute <= 0) {
 			continue;
 		}
-
+		
 		if(epochResult.endBlock > currentBlock)
 		{
 			platforms.push({
@@ -84,13 +90,13 @@ const getValidPlatforms = async (web3: Web3, currentBlock: number) => {
 const runPlatformChecks = async (web3: Web3, platform: Platform) : Promise<Platform | null> => {
 	const reserves = await getLiquidityReserves(web3, platform);
     
-	if(reserves[1] < (500000 * Math.pow(10, 18)))
+	if(reserves[platform.daiReservePosition] < (500000 * Math.pow(10, 18)))
 	{
 		log(`Dai in LP balance too low, might be a rugpull. Check liquidity on ${platform.name}`);
 		return null;
 	}
 
-	const price = (reserves[1] / Math.pow(10, 18)) / (reserves[0] / Math.pow(10, platform.numberOfDecimals));
+	const price = (reserves[platform.daiReservePosition] / Math.pow(10, 18)) / (reserves[platform.tokenReservePosition] / Math.pow(10, platform.numberOfDecimals));
 
 	if(price < platform.priceFloor)
 	{

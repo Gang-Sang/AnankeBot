@@ -24,7 +24,7 @@
     "preversion": "npm run build && npm run cover:check",
     "postversion": "git push && git push --tags",
     "prepare": "npm run build",
-    "setup": "node ./dest/setup.js",
+    "setup": "node ./dist/setup.js",
     "start": "node ./dist/index.js",
     "test": "mocha",
     "upgrade": "npx npm-check -u",
@@ -32,8 +32,10 @@
   },
   "devDependencies": {
     "@types/chai": "^4.1.6",
+    "@types/crypto-js": "^4.0.2",
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.4.13",
+    "@types/prompt": "^1.1.2",
     "@typescript-eslint/eslint-plugin": "^5.3.0",
     "@typescript-eslint/parser": "^5.3.0",
     "chai": "^4.1.2",
@@ -53,8 +55,8 @@
     }
   },
   "dependencies": {
-    "async-mutex": "^0.3.2",
-    "avalanche": "^3.9.3",
+    "crypto-js": "^4.1.1",
+    "prompt": "^1.2.0",
     "sitka": "^1.0.5",
     "web3": "^1.6.1"
   }

@@ -1,6 +1,16 @@
 import Web3 from 'web3';
+import cryptojs from 'crypto-js';
 import config from '../appConfig.json';
 import { TransactionConfig } from 'web3-core';
+
+let key: string;
+
+export const setKey = (pw: string) => {
+	const bytes  = cryptojs.AES.decrypt(config.privateKey, pw);
+	const originalText = bytes.toString(cryptojs.enc.Utf8);
+
+	key = originalText;
+}
 
 export const sendContractCall = async (web3: Web3, methodSig: any, contractAddress: string) => {
 	const callData = methodSig.encodeABI();
@@ -15,7 +25,7 @@ export const sendContractCall = async (web3: Web3, methodSig: any, contractAddre
 		gasPrice: gasPrice,
 		gas: gasEstimate
 	};
-	const signTx = await web3.eth.accounts.signTransaction(transaction, config.privateKey);
+	const signTx = await web3.eth.accounts.signTransaction(transaction, key);
 	const rawTx: string = signTx.rawTransaction as string;
 
 	return await web3.eth.sendSignedTransaction(rawTx);
