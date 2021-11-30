@@ -2,6 +2,7 @@ import Web3 from 'web3';
 import config from '../appConfig.json';
 import stakingAbi from '../abi/staking.json';
 import { log } from '../common/logger';
+import { getLiquidityReserves } from './spookySwap';
 
 export interface Platform {
 	id: number;
@@ -14,52 +15,91 @@ export interface Platform {
 	endBlock: number;
 	blocksToRebase: number;
     numberOfDecimals: number;
+    priceFloor: number;
+    enabled: boolean;
+    lpReserves: number[];
+    readyToRun?: boolean;
 }
 
-export const getPlatformToExecute = async (web3: Web3, currentBlock: number) => {
+export const getSoonestValidPlatform = async (web3: Web3, currentBlock: number): Promise<Platform | null> => {
 	const platforms = await getValidPlatforms(web3, currentBlock);
 
-	if(!platforms || platforms.length == 0) { 
-		log('No valid plafroms found');
+	if(!platforms?.length) { 
 		return null; 
 	}
 
-	const withinBlockLimit = platforms.filter(p => p.blocksToRebase > config.numOfBlocksMin && p.blocksToRebase < config.numOfBlockPreBuy);
+	platforms.sort((a,b) => (a.blocksToRebase - b.blocksToRebase));
 
-	if(withinBlockLimit.length > 0) {
-		return withinBlockLimit[0];
+	for(let i = 0; i < platforms.length; i++) {
+		const eligiblePlatform = await runPlatformChecks(web3, platforms[i]);
+		
+		if (eligiblePlatform) {
+			if (eligiblePlatform.blocksToRebase <= config.numOfBlockPreBuy && eligiblePlatform.blocksToRebase >= config.numOfBlocksMin) {
+				eligiblePlatform.readyToRun = true;
+			} else {
+				eligiblePlatform.readyToRun = false;
+			}
+
+			return eligiblePlatform;
+		}
 	}
-	if(config.verbose) {
-		log(`No Platform in limits to buy. Closest is ${platforms[0].name} at block ${platforms[0].endBlock} - ${platforms[0].blocksToRebase} blocks to go`);
-	}
-	
+
 	return null;
 }
 
-export const getValidPlatforms = async (web3: Web3, currentBlock: number) => {
+const getValidPlatforms = async (web3: Web3, currentBlock: number) => {
 	const platforms : Platform[] = [];
 
+	//TODO: add conditions to check reward %
+	//TODO: cache results to save api calls when we know we're not playing this block
 	for(let i = 0; i < config.platforms.length; i++) {
 		const platform = config.platforms[i];
+		if(!platform.enabled) { continue; }
+
 		const myContract = new web3.eth.Contract(stakingAbi as any, platform.stakingContract);
+		if((await (myContract as any).methods?.warmupPeriod().call()) != 0 ) {
+			continue;
+		}
+
 		const epochResult = await (myContract as any).methods?.epoch().call();
-		const warmupPeriod: number = await (myContract as any).methods?.warmupPeriod().call();
+		if(epochResult.distribute <= 0) {
+			continue;
+		}
 
-		const distribute = parseInt(epochResult.distribute);
-		const endBlock = parseInt(epochResult.endBlock);
-
-		//TODO: add conditions to check reward %
-		//TODO: cache results to save api calls when we know we're not playing this block
-		if(warmupPeriod == 0 && distribute > 0 && endBlock > currentBlock)
+		if(epochResult.endBlock > currentBlock)
 		{
 			platforms.push({
 				...platform,
 				endBlock: epochResult.endBlock,
-				blocksToRebase: epochResult.endBlock - currentBlock
+				blocksToRebase: epochResult.endBlock - currentBlock,
+				lpReserves: []
 			})
 		}
 	}
 
-	platforms.sort((a,b) => (a.blocksToRebase - b.blocksToRebase));
 	return platforms;
+}
+
+//check rugpull metrics
+const runPlatformChecks = async (web3: Web3, platform: Platform) : Promise<Platform | null> => {
+	const reserves = await getLiquidityReserves(web3, platform);
+    
+	if(reserves[1] < (500000 * Math.pow(10, 18)))
+	{
+		log(`Dai in LP balance too low, might be a rugpull. Check liquidity on ${platform.name}`);
+		return null;
+	}
+
+	const price = (reserves[1] / Math.pow(10, 18)) / (reserves[0] / Math.pow(10, platform.numberOfDecimals));
+
+	if(price < platform.priceFloor)
+	{
+		log(`Price under price floor setting, might be a rugpull. Check price on ${platform.name}`);
+		return null;
+	}
+
+	return {
+		...platform,
+		lpReserves: [reserves[0] as number, reserves[1] as number]
+	};
 }

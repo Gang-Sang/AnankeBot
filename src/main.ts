@@ -2,8 +2,8 @@ import Web3 from 'web3';
 import { log } from './common/logger';
 import { getBalace } from './common/erc20';
 import config from './appConfig.json';
-import { getPlatformToExecute } from './main/platforms';
-import { getLiquidityReserves } from './main/spookySwap';
+import { getSoonestValidPlatform, Platform } from './main/platforms';
+
 import { executeBuySell } from './main/buySellRebase';
 
 export const mainProgramLoop = async () => {
@@ -11,8 +11,24 @@ export const mainProgramLoop = async () => {
 	web3.eth.defaultAccount = config.publicKey;
 
 	while (true) {
-		await mainFunction(web3);
-		await sleep(30 * 1000);
+		const currentBlock = await web3.eth.getBlockNumber();
+		const soonestPlatform = await mainFunction(web3, currentBlock);
+
+		if(soonestPlatform && soonestPlatform.blocksToRebase > (config.numOfBlockPreBuy * 1.5)) {
+			const minWakeupBlock = soonestPlatform.endBlock - (config.numOfBlockPreBuy * 1.5);
+			const targetWakeupBlock = currentBlock + ((minWakeupBlock - currentBlock) / 2)//half the distance to min wake up
+			const blockToSleepTill = Math.ceil(Math.min(minWakeupBlock, targetWakeupBlock));
+			const sleepTime = blockToSleepTill - currentBlock; //each block ~ 1sec
+
+			if(sleepTime < 30) {
+				await sleep(30 * 1000);
+			} else {
+				log(`Next ${soonestPlatform.name} rebase on block ${soonestPlatform.endBlock}. current block-${currentBlock} wake up around block ${blockToSleepTill}. ~${sleepTime/60} mins`);
+				await sleep(sleepTime * 1000);
+			}
+		} else {
+			await sleep(30 * 1000);
+		}
 	}
 }
 
@@ -20,27 +36,19 @@ async function sleep(msec: number) {
 	return new Promise(resolve => setTimeout(resolve, msec));
 }
 
-async function mainFunction(web3: Web3) {
-	const currentBlock = await web3.eth.getBlockNumber();
-	log(`current block-${currentBlock}`);
-
-	const executePlatform = await getPlatformToExecute(web3, currentBlock);
-	if(!executePlatform) { return; }
+async function mainFunction(web3: Web3, currentBlock: number) : Promise<Platform | null> {
+	const executePlatform = await getSoonestValidPlatform(web3, currentBlock);
+	if(!executePlatform) { return null; }
+	if(!executePlatform?.readyToRun) { return executePlatform; }
 
 	const daiBalance = await getBalace(web3, config.daiTokenAddress);
 	if (daiBalance <= 0 ) {
 		log(`dai balance not enough to trade, exiting. Balance - ${daiBalance}`);
-		return;
+		return null;
 	}
 
-	//check rugpull metrics
-	const reserves = await getLiquidityReserves(web3, executePlatform);
-	if(reserves[1] < (1000000 * Math.pow(10, 18)))
-	{
-		log(`Dai in LP balance too low, might be a rugpull. Dai Liquidity ${reserves[1]}`);
-		return;
-	}
+	await executeBuySell(web3, executePlatform);
 
-	await executeBuySell(web3, executePlatform, reserves);
+	return null;
 }
 

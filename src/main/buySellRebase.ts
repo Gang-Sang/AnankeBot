@@ -10,11 +10,11 @@ import { stakeAllTokens, unstakeAllTokens } from './staking';
 
 const waitLoopLimit = 60;
 
-export const executeBuySell = async (web3: Web3, platform: Platform, reserves: number[]) => {
+export const executeBuySell = async (web3: Web3, platform: Platform) => {
 	log(`Starting buy/sell cycle for ${platform.name}`);
 
 	//buy token
-	const buyReceipt = await buyToken(web3, platform, 100 * Math.pow(10, 18), reserves);
+	const buyReceipt = await buyToken(web3, platform, 100 * Math.pow(10, 18), platform.lpReserves);
 	if(buyReceipt) {
 		log('Token buy transaction sucessful');
 		log(JSON.stringify(buyReceipt));
@@ -47,7 +47,7 @@ export const executeBuySell = async (web3: Web3, platform: Platform, reserves: n
 	}
 
 	//convert back to dai
-	const sellReceipt = await sellAllTokensForDai(web3, platform, reserves);
+	const sellReceipt = await sellAllTokensForDai(web3, platform, platform.lpReserves);
 	if(sellReceipt) {
 		log(`Sell token ${platform.name} sucessful`);
 		log(JSON.stringify(sellReceipt));
