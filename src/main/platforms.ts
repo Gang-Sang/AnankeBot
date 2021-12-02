@@ -11,13 +11,15 @@ export interface Platform {
     stakingHelperContract: string;
 	tokenContract: string;
     stakingTokenContract: string;
-    daiLPPoolContract: string;
-    daiReservePosition: number,
+    stableLPPoolContract: string;
+    stableReservePosition: number,
     tokenReservePosition: number,
 	endBlock: number;
 	blocksToRebase: number;
     numberOfDecimals: number;
     priceFloor: number;
+    liquidityFloor: number;
+    positionSize: string;
     enabled: boolean;
     lpReserves: bigint[];
     readyToRun?: boolean;
@@ -34,19 +36,22 @@ export const getSoonestValidPlatform = async (web3: Web3, currentBlock: number):
 
 	for(let i = 0; i < platforms.length; i++) {
 		const eligiblePlatform = await runPlatformChecks(web3, platforms[i]);
-		/*
-		if(eligiblePlatform)
-			eligiblePlatform.readyToRun = true;
-		return eligiblePlatform;*/
 		
-		if (eligiblePlatform) {
-			if (eligiblePlatform.blocksToRebase <= config.numOfBlockPreBuy && eligiblePlatform.blocksToRebase >= config.numOfBlocksMin) {
+		if(config.testMode) {
+			if(eligiblePlatform)
 				eligiblePlatform.readyToRun = true;
-			} else {
-				eligiblePlatform.readyToRun = false;
-			}
-
 			return eligiblePlatform;
+		}
+		else {
+			if (eligiblePlatform) {
+				if (eligiblePlatform.blocksToRebase <= config.numOfBlockPreBuy && eligiblePlatform.blocksToRebase >= config.numOfBlocksMin) {
+					eligiblePlatform.readyToRun = true;
+				} else {
+					eligiblePlatform.readyToRun = false;
+				}
+    
+				return eligiblePlatform;
+			}
 		}
 	}
 
@@ -91,13 +96,13 @@ const runPlatformChecks = async (web3: Web3, platform: Platform) : Promise<Platf
 	const reserves = await getLiquidityReserves(web3, platform);
 	const lpReserves = [BigInt(reserves[0]), BigInt(reserves[1])]
     
-	if(lpReserves[platform.daiReservePosition] < (500000 * Math.pow(10, 18)))
+	if(lpReserves[platform.stableReservePosition] < (BigInt(platform.liquidityFloor) * BigInt(Math.pow(10, config.stableNumOfDecimals))))
 	{
-		log(`Dai in LP balance too low, might be a rugpull. Check liquidity on ${platform.name}`);
+		log(`StableCoin in LP balance too low, might be a rugpull. Check liquidity on ${platform.name}`);
 		return null;
 	}
 
-	const price = (lpReserves[platform.daiReservePosition] / BigInt(Math.pow(10, 18))) / (lpReserves[platform.tokenReservePosition] / BigInt(Math.pow(10, platform.numberOfDecimals)));
+	const price = (lpReserves[platform.stableReservePosition] / BigInt(Math.pow(10, 18))) / (lpReserves[platform.tokenReservePosition] / BigInt(Math.pow(10, platform.numberOfDecimals)));
 
 	if(price < platform.priceFloor)
 	{

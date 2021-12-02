@@ -47,16 +47,31 @@ async function mainFunction(web3: Web3, currentBlock: number): Promise<Platform 
 	if (!executePlatform) { return null; }
 	if (!executePlatform?.readyToRun) { return executePlatform; }
 
-	const daiBalance = await getBalace(web3, config.daiTokenAddress);
-	if (daiBalance <= 0) {
-		log(`dai balance not enough to trade, exiting. Balance - ${daiBalance}`);
+	const stableBalance = await getBalace(web3, config.stableTokenAddress);
+	if (stableBalance <= 0) {
+		log(`stable balance not enough to trade, exiting. Balance - ${stableBalance}`);
 		return null;
 	}
 
-	const daiToTurn = (daiBalance * 90n) / 100n;
+	const stableAmount = getAmountToStableCoinToTrade(executePlatform, stableBalance);
+	if(stableAmount <= 0 || stableAmount > stableBalance) {
+		log(`No enough stable balance to trade, exiting. Balance - ${stableBalance}, trade amount - ${stableAmount}`);
+		return null;
+	}
 
-	await executeBuySell(web3, executePlatform, daiToTurn);
-
+	await executeBuySell(web3, executePlatform, stableAmount);
 	return null;
+}
+
+const getAmountToStableCoinToTrade = (platform: Platform, currentBlance: bigint) => {
+	if(config.testMode) {
+		return BigInt(100 * Math.pow(10, 18));
+	}
+	if (platform.positionSize.indexOf('%') != -1) {
+		const percent = BigInt(platform.positionSize.substring(0, platform.positionSize.length -1));
+		return (currentBlance * percent) / 100n;
+	}
+
+	return BigInt(platform.positionSize);
 }
 

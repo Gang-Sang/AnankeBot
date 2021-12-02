@@ -2,11 +2,13 @@
     "publicKey": "test",
     "privateKey": "test",
     "apiUrlBase": "https://rpc.ftm.tools/",
-    "daiTokenAddress": "0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E",
+    "stableTokenAddress": "0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E",
+    "stableNumOfDecimals": 18,
     "spookRouterAddress": "0xF491e7B69E4244ad4002BC14e878a34207E38c29",
 	"numOfBlockPreBuy": 300,
 	"numOfBlocksMin": 60,
 	"verbose": true,
+    "testMode": true,
     "platforms": [
         { 
 			"id": 1,
@@ -15,11 +17,13 @@
             "stakingHelperContract": "0xbd39045344cD9b8FB4622959725D65e49dB2D090",
             "tokenContract": "0x5602df4A94eB6C680190ACCFA2A475621E0ddBdc",
             "stakingTokenContract": "0x8e2549225E21B1Da105563D419d5689b80343E01",
-			"daiLPPoolContract": "0xFa5a5F0bC990Be1D095C5385Fff6516F6e03c0a7",
-            "daiReservePosition": 1,
+			"stableLPPoolContract": "0xFa5a5F0bC990Be1D095C5385Fff6516F6e03c0a7",
+            "stableReservePosition": 1,
             "tokenReservePosition": 0,
             "numberOfDecimals": 9,
 			"priceFloor": 100.00,
+            "liquidityFloor": 13000000,
+            "positionSize": "95%",
 			"enabled": true
         },
         { 
@@ -29,11 +33,13 @@
             "stakingHelperContract": "0x2694c2AAab19950B37FE47478276B5D4a2A73C45",
             "tokenContract": "0x5C4FDfc5233f935f20D2aDbA572F770c2E377Ab0",
             "stakingTokenContract": "0x75bdeF24285013387A47775828bEC90b91Ca9a5F",
-			"daiLPPoolContract": "0xbc0eecda2d8141e3a26d2535c57cadcb1095bca9",
-            "daiReservePosition": 1,
+			"stableLPPoolContract": "0xbc0eecda2d8141e3a26d2535c57cadcb1095bca9",
+            "stableReservePosition": 1,
             "tokenReservePosition": 0,
             "numberOfDecimals": 9,
 			"priceFloor": 120.00,
+            "liquidityFloor": 1000000,
+            "positionSize": "95%",
 			"enabled": false
         },
         { 
@@ -43,11 +49,13 @@
             "stakingHelperContract": "0x43CdFC01C2DEF98C595b28E72b58D2575AA05E9B",
             "tokenContract": "0x3b57f3FeAaF1e8254ec680275Ee6E7727C7413c7",
             "stakingTokenContract": "0x8de250C65636Ef02a75e4999890c91cECd38D03D",
-			"daiLPPoolContract": "0xc0c1dff0fe24108586e11ec9e20a7cbb405cb769",
-            "daiReservePosition": 1,
+			"stableLPPoolContract": "0xc0c1dff0fe24108586e11ec9e20a7cbb405cb769",
+            "stableReservePosition": 1,
             "tokenReservePosition": 0,
             "numberOfDecimals": 9,
-			"priceFloor": 700.00,
+			"priceFloor": 600.00,
+            "liquidityFloor": 400000,
+            "positionSize": "2000",
 			"enabled": true
         },
         { 
@@ -57,11 +65,13 @@
             "stakingHelperContract": "0x068e87aa1eABEBBad65378Ede4B5C16E75e5a671",
             "tokenContract": "0xfa1FBb8Ef55A4855E5688C0eE13aC3f202486286",
             "stakingTokenContract": "0x5E983ff70DE345de15DbDCf0529640F14446cDfa",
-			"daiLPPoolContract": "0xd77fc9c4074b56ecf80009744391942fbfddd88b",
-            "daiReservePosition": 0,
+			"stableLPPoolContract": "0xd77fc9c4074b56ecf80009744391942fbfddd88b",
+            "stableReservePosition": 0,
             "tokenReservePosition": 1,
             "numberOfDecimals": 9,
-			"priceFloor": 250.00,
+			"priceFloor": 300.00,
+            "liquidityFloor": 700000,
+            "positionSize": "95%",
 			"enabled": true
         }
     ]

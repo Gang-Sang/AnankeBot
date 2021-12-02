@@ -5,25 +5,24 @@ import { sendContractCall } from '../common/transactionHelper';
 import uniswapPairAbi from '../abi/unswapV2Pair.json';
 import spookyRouterAbi from '../abi/spookySwapRouter.json';
 
+
 export const getLiquidityReserves = async (web3: Web3, platform: Platform) => {
-	const myContract = new web3.eth.Contract(uniswapPairAbi as any, platform.daiLPPoolContract);
+	const myContract = new web3.eth.Contract(uniswapPairAbi as any, platform.stableLPPoolContract);
 	const reserves = await (myContract as any).methods.getReserves().call();
 	return [reserves._reserve0, reserves._reserve1];
 }
 
-export const swapDaiForTokens = async (web3: Web3, platform: Platform, daiAmount: bigint, reserves: bigint[]) => {
-	const currentPrice = reserves[platform.daiReservePosition] / reserves[platform.tokenReservePosition];
-	const minOut = (((daiAmount / currentPrice) * 99n) / 100n).toString();
-	const path = [config.daiTokenAddress, platform.tokenContract];
-
-	return await sendSwapTransaction(web3, platform, daiAmount.toString(), minOut, path);
+export const swapStableForTokens = async (web3: Web3, platform: Platform, stableAmount: bigint, reserves: bigint[]) => {
+	const currentPrice = reserves[platform.stableReservePosition] / reserves[platform.tokenReservePosition];
+	const minOut = (((stableAmount / currentPrice) * 99n) / 100n).toString();
+	const path = [config.stableTokenAddress, platform.tokenContract];
+	return await sendSwapTransaction(web3, platform, stableAmount.toString(), minOut, path);
 }
 
-export const swapTokensForDai = async (web3: Web3, platform: Platform, tokenAmount: bigint, reserves: bigint[]) => {
-	const currentPrice = reserves[platform.tokenReservePosition] / reserves[platform.daiReservePosition];
-	const minOut = (((tokenAmount / currentPrice) * 97n) / 100n).toString();
-	const path = [platform.tokenContract, config.daiTokenAddress];
-
+export const swapTokensForStable = async (web3: Web3, platform: Platform, tokenAmount: bigint, reserves: bigint[]) => {
+	const currentPrice = reserves[platform.stableReservePosition] / reserves[platform.tokenReservePosition];
+	const minOut = (((currentPrice * tokenAmount) * 97n) / 100n).toString();
+	const path = [platform.tokenContract, config.stableTokenAddress];
 	return await sendSwapTransaction(web3, platform, tokenAmount.toString(), minOut, path);
 }
 
