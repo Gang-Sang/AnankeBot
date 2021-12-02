@@ -58,7 +58,9 @@ export const executeBuySell = async (web3: Web3, platform: Platform, stableAmoun
 	}
 
 	log(`Ending buy/sell cycle for ${platform.name}`);
-	logRebase(platform, buyReceipt, sellReceipt);
+	if(!config.testMode) {
+		logRebase(platform, buyReceipt, sellReceipt);
+	}
 }
 
 const buyToken = async (web3: Web3, platform: Platform, stableAmount: bigint, reserves: bigint[]) => {

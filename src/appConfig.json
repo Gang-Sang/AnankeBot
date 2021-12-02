@@ -39,8 +39,8 @@
             "numberOfDecimals": 9,
 			"priceFloor": 120.00,
             "liquidityFloor": 1000000,
-            "positionSize": "95%",
-			"enabled": false
+            "positionSize": "100%",
+			"enabled": true
         },
         { 
 			"id": 3,
