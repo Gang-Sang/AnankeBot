@@ -8,7 +8,7 @@
 	"numOfBlockPreBuy": 300,
 	"numOfBlocksMin": 60,
 	"verbose": true,
-    "testMode": true,
+    "testMode": false,
     "platforms": [
         { 
 			"id": 1,
