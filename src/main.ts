@@ -65,13 +65,13 @@ async function mainFunction(web3: Web3, currentBlock: number): Promise<Platform 
 
 const getAmountToStableCoinToTrade = (platform: Platform, currentBlance: bigint) => {
 	if(config.testMode) {
-		return BigInt(100 * Math.pow(10, 18));
+		return BigInt(100 * Math.pow(10, config.stableNumOfDecimals));
 	}
 	if (platform.positionSize.indexOf('%') != -1) {
 		const percent = BigInt(platform.positionSize.substring(0, platform.positionSize.length -1));
 		return (currentBlance * percent) / 100n;
 	}
 
-	return BigInt(platform.positionSize);
+	return BigInt(platform.positionSize) * BigInt(Math.pow(10, config.stableNumOfDecimals));
 }
 
