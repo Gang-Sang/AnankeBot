@@ -63,7 +63,7 @@ export const executeBuySell = async (web3: Web3, platform: Platform, stableAmoun
 
 const buyToken = async (web3: Web3, platform: Platform, stableAmount: bigint, reserves: bigint[]) => {
 	log('buy token');
-	return await retryBLock('buy token', async () => {
+	return await transactionRetryBLock('buy token', async () => {
 		await checkAllowanceAndApprove(web3, config.stableTokenAddress, config.spookRouterAddress, stableAmount);
 		const receipt = await swapStableForTokens(web3, platform, stableAmount, reserves);
 		return await waitForTransaction(web3, receipt);
@@ -72,13 +72,13 @@ const buyToken = async (web3: Web3, platform: Platform, stableAmount: bigint, re
 
 const sellAllTokensForStable = async (web3: Web3, platform: Platform, reserves: bigint[]) => {
 	log('sell all token');
-	return await retryBLock('sell all token', async () => {
-		const platformBalance = await getBalace(web3, platform.tokenContract);
+	const platformBalance = await getBalanceWithRetry(web3, platform.tokenContract);
+	if(platformBalance == BigInt(0)) {
+		log(`Cannot sell tokens balance-${platformBalance}`);
+		return;
+	}
 
-		if(platformBalance == BigInt(0)) {
-			log(`Cannot sell tokens balance-${platformBalance}`);
-		}
-
+	return await transactionRetryBLock('sell all token', async () => {
 		await checkAllowanceAndApprove(web3, platform.tokenContract, config.spookRouterAddress, platformBalance);
 		const receipt = await swapTokensForStable(web3, platform, platformBalance, reserves);
 		return await waitForTransaction(web3, receipt);
@@ -87,30 +87,30 @@ const sellAllTokensForStable = async (web3: Web3, platform: Platform, reserves: 
 
 const stakePlatform = async (web3: Web3, platform: Platform) => {
 	log('stake token');
-	return await retryBLock('stake token', async () => {
-		const tokenBalance = await getBalace(web3, platform.tokenContract);
-		
-		if(tokenBalance == BigInt(0)) {
-			log(`Cannot stake token balance-${tokenBalance}`);
-		}
+	const platformBalance = await getBalanceWithRetry(web3, platform.tokenContract);
+	if(platformBalance == BigInt(0)) {
+		log(`Cannot sell tokens balance-${platformBalance}`);
+		return;
+	}
 
-		await checkAllowanceAndApprove(web3, platform.tokenContract, platform.stakingHelperContract, tokenBalance);
-		const receipt = await stakeTokens(web3, platform, tokenBalance);
+	return await transactionRetryBLock('stake token', async () => {
+		await checkAllowanceAndApprove(web3, platform.tokenContract, platform.stakingHelperContract, platformBalance);
+		const receipt = await stakeTokens(web3, platform, platformBalance);
 		return await waitForTransaction(web3, receipt);
 	});
 }
 
 const unstakePlatform = async (web3: Web3, platform: Platform) => {
 	log('unstake token');
-	return await retryBLock('unstake token', async () => {
-		const tokenBalance = await getBalace(web3, platform.stakingTokenContract);
+	const platformBalance = await getBalanceWithRetry(web3, platform.stakingTokenContract);
+	if(platformBalance == BigInt(0)) {
+		log(`Cannot sell tokens balance-${platformBalance}`);
+		return;
+	}
 
-		if(tokenBalance == BigInt(0)) {
-			log(`Cannot unstake token balance-${tokenBalance}`);
-		}
-
-		await checkAllowanceAndApprove(web3, platform.stakingTokenContract, platform.stakingContract, tokenBalance);
-		const receipt = await unstakeTokens(web3, platform, tokenBalance);
+	return await transactionRetryBLock('unstake token', async () => {
+		await checkAllowanceAndApprove(web3, platform.stakingTokenContract, platform.stakingContract, platformBalance);
+		const receipt = await unstakeTokens(web3, platform, platformBalance);
 		return await waitForTransaction(web3, receipt);
 	});
 }
@@ -120,7 +120,7 @@ const checkAllowanceAndApprove = async (web3: Web3, contract: string, spender: s
 
 	if(amount > allowance) {
 		log('Not enough approved funds, sending approve now');
-		return await retryBLock('approve', async () => {
+		return await transactionRetryBLock('approve', async () => {
 			const approveReceipt = await approve(web3, contract, spender, amount * 4n);
 			return await waitForTransaction(web3, approveReceipt);
 		});
@@ -147,6 +147,21 @@ const watchForRebase = async (web3: Web3, platform: Platform) => {
 	return endBlock;
 }
 
+const getBalanceWithRetry = async (web3: Web3, contract: string) => {
+	const loopLimit = 10;
+
+	for(let i = 0; i < loopLimit; i++) {
+		const balance = await getBalace(web3, contract);
+		if(balance > 0) {
+			return balance;
+		}
+
+		sleep(1 * 1000);
+	}
+
+	return BigInt(0);
+}
+
 const waitForTransaction = async (web3: Web3, receipt: TransactionReceipt) => {
 	let loops = 0;
 	let retrieveReciept: TransactionReceipt;
@@ -169,7 +184,7 @@ const waitForTransaction = async (web3: Web3, receipt: TransactionReceipt) => {
 	throw `Failed to confirm transaction, manually check status of tx ${receipt?.transactionHash}`;
 }
 
-const retryBLock = async (processName: string, fn: () => Promise<TransactionReceipt | null>) => {
+const transactionRetryBLock = async (processName: string, fn: () => Promise<TransactionReceipt | null>) => {
 	for(let i = 0; i < 3; i++) {
 		try {
 			if(i > 0) {
@@ -212,3 +227,4 @@ const logRebase = (platform: Platform, buyReceipt: TransactionReceipt, sellRecei
 
 	logRebaseComplete(platform.name, buyAmount, sellAmount, config.stableNumOfDecimals);
 }
+
