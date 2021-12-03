@@ -72,6 +72,11 @@ const getAmountToStableCoinToTrade = (platform: Platform, currentBlance: bigint)
 		return (currentBlance * percent) / 100n;
 	}
 
-	return BigInt(platform.positionSize) * BigInt(Math.pow(10, config.stableNumOfDecimals));
+    const staticAmount = BigInt(platform.positionSize) * BigInt(Math.pow(10, config.stableNumOfDecimals));;
+	if(currentBlance < staticAmount) {
+        return currentBlance;
+    } else {
+        return staticAmount;
+    }
 }
 

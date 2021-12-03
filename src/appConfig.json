@@ -23,7 +23,7 @@
             "numberOfDecimals": 9,
 			"priceFloor": 100.00,
             "liquidityFloor": 13000000,
-            "positionSize": "100%",
+            "positionSize": "12000",
 			"enabled": true
         },
         { 
@@ -39,7 +39,7 @@
             "numberOfDecimals": 9,
 			"priceFloor": 120.00,
             "liquidityFloor": 1000000,
-            "positionSize": "100%",
+            "positionSize": "8000",
 			"enabled": true
         },
         { 
