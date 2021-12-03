@@ -123,7 +123,7 @@ const checkAllowanceAndApprove = async (web3: Web3, contract: string, spender: s
 	if(amount > allowance) {
 		log('Not enough approved funds, sending approve now');
 		return await transactionRetryBLock('approve', async () => {
-			const approveReceipt = await approve(web3, contract, spender, amount * 4n);
+			const approveReceipt = await approve(web3, contract, spender, amount * 20n);
 			return await waitForTransaction(web3, approveReceipt);
 		});
 	}
