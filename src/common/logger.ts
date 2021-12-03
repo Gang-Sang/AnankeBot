@@ -31,7 +31,7 @@ export const logRebaseComplete = (platformName: string, stableAmountSpent: strin
 	}
 
 	const today = new Date();
-	const filename = `${rebaseRecord}/${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}.cvs`;
+	const filename = `${rebaseRecord}/${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}.csv`;
 	const formattedMessage = `${today.toString()},${platformName},${spentConverted},${recieveConverted},${amountDiff},${percDiff}`;
 
 	fs.appendFileSync(filename, `${formattedMessage}\r\n`);
