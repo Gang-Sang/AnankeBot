@@ -21,7 +21,6 @@ export const executeBuySell = async (web3: Web3, platform: Platform, stableAmoun
 		log('Token buy transaction failed, exiting buy/sell process');
 		return;
 	}
-	sleep(2 * 1000);//
 
 	//stake token
 	if(await stakePlatform(web3, platform)) {
@@ -38,7 +37,6 @@ export const executeBuySell = async (web3: Web3, platform: Platform, stableAmoun
 			log(`Rebase of ${platform.name} complete. Next rebase on ${newRebaseBlock}`);
 		}
 	}
-	await sleep(2 * 1000);
 
 	//unstake token
 	if(await unstakePlatform(web3, platform)) {
@@ -150,7 +148,7 @@ const watchForRebase = async (web3: Web3, platform: Platform) => {
 }
 
 const getBalanceWithRetry = async (web3: Web3, contract: string) => {
-	const loopLimit = 10;
+	const loopLimit = 50;
 
 	for(let i = 0; i < loopLimit; i++) {
 		const balance = await getBalace(web3, contract);
@@ -166,7 +164,7 @@ const getBalanceWithRetry = async (web3: Web3, contract: string) => {
 
 const waitForTransaction = async (web3: Web3, receipt: TransactionReceipt) => {
 	let loops = 0;
-	let retrieveReciept: TransactionReceipt;
+	let retrieveReciept: TransactionReceipt | null = null;
     
 	while (loops < waitLoopLimit) {
 		retrieveReciept = await web3.eth.getTransactionReceipt(receipt.transactionHash);
@@ -183,6 +181,7 @@ const waitForTransaction = async (web3: Web3, receipt: TransactionReceipt) => {
 		await sleep(10 * 1000);
 	}
 
+	log(JSON.stringify(retrieveReciept ?? receipt));
 	throw `Failed to confirm transaction, manually check status of tx ${receipt?.transactionHash}`;
 }
 

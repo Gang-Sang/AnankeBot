@@ -21,7 +21,7 @@ export const swapStableForTokens = async (web3: Web3, platform: Platform, stable
 
 export const swapTokensForStable = async (web3: Web3, platform: Platform, tokenAmount: bigint, reserves: bigint[]) => {
 	const currentPrice = reserves[platform.stableReservePosition] / reserves[platform.tokenReservePosition];
-	const minOut = (((currentPrice * tokenAmount) * 97n) / 100n).toString();
+	const minOut = (((currentPrice * tokenAmount) * 80n) / 100n).toString();
 	const path = [platform.tokenContract, config.stableTokenAddress];
 	return await sendSwapTransaction(web3, platform, tokenAmount.toString(), minOut, path);
 }
