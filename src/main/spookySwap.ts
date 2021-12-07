@@ -28,8 +28,8 @@ export const swapTokensForStable = async (web3: Web3, platform: Platform, tokenA
 
 const sendSwapTransaction = async (web3: Web3, platform: Platform, tokenAmount: string, minOut: string, path: string[]) => {
 	const deadline = (Date.now() + (5 * 60 * 1000)).toString();//5 mins
-	const routerContract = new web3.eth.Contract(spookyRouterAbi as any, config.spookRouterAddress);
+	const routerContract = new web3.eth.Contract(spookyRouterAbi as any, platform.swapRouterContract);
 	const methodSig = await routerContract.methods.swapExactTokensForTokens(tokenAmount, minOut, path, config.publicKey, deadline);
 
-	return await sendContractCall(web3, methodSig, config.spookRouterAddress);
+	return await sendContractCall(web3, methodSig, platform.swapRouterContract);
 }

@@ -12,6 +12,7 @@ export interface Platform {
 	tokenContract: string;
     stakingTokenContract: string;
     stableLPPoolContract: string;
+	swapRouterContract: string;
     stableReservePosition: number,
     tokenReservePosition: number,
 	endBlock: number;

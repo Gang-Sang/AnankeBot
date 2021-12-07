@@ -64,7 +64,7 @@ export const executeBuySell = async (web3: Web3, platform: Platform, stableAmoun
 const buyToken = async (web3: Web3, platform: Platform, stableAmount: bigint, reserves: bigint[]) => {
 	log('buy token');
 	return await transactionRetryBLock('buy token', async () => {
-		await checkAllowanceAndApprove(web3, config.stableTokenAddress, config.spookRouterAddress, stableAmount);
+		await checkAllowanceAndApprove(web3, config.stableTokenAddress, platform.swapRouterContract, stableAmount);
 		const receipt = await swapStableForTokens(web3, platform, stableAmount, reserves);
 		return await waitForTransaction(web3, receipt);
 	});
@@ -79,7 +79,7 @@ const sellAllTokensForStable = async (web3: Web3, platform: Platform, reserves: 
 	}
 
 	return await transactionRetryBLock('sell all token', async () => {
-		await checkAllowanceAndApprove(web3, platform.tokenContract, config.spookRouterAddress, platformBalance);
+		await checkAllowanceAndApprove(web3, platform.tokenContract, platform.swapRouterContract, platformBalance);
 		const receipt = await swapTokensForStable(web3, platform, platformBalance, reserves);
 		return await waitForTransaction(web3, receipt);
 	});
