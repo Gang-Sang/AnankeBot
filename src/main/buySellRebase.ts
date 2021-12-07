@@ -32,9 +32,9 @@ export const executeBuySell = async (web3: Web3, platform: Platform, stableAmoun
                                                                                          
 	//watch for rebase
 	if(!config.testMode) {
-		const newRebaseBlock = await watchForRebase(web3, platform);
+		await watchForRebase(web3, platform);
 		if(config.verbose) {
-			log(`Rebase of ${platform.name} complete. Next rebase on ${newRebaseBlock}`);
+			log(`Rebase of ${platform.name} complete.`);
 		}
 	}
 
@@ -89,7 +89,7 @@ const stakePlatform = async (web3: Web3, platform: Platform) => {
 	log('stake token');
 	const platformBalance = await getBalanceWithRetry(web3, platform.tokenContract);
 	if(platformBalance == BigInt(0)) {
-		log(`Cannot sell tokens balance-${platformBalance}`);
+		log(`Cannot stake tokens balance-${platformBalance}`);
 		return;
 	}
 
@@ -141,6 +141,11 @@ const watchForRebase = async (web3: Web3, platform: Platform) => {
 			break;
 		}
 
+		const currentBlock = await web3.eth.getBlockNumber();
+		if(currentBlock >= platform.endBlock) {
+			return;
+		}
+
 		await sleep(10 * 1000);
 	}
 
@@ -156,7 +161,7 @@ const getBalanceWithRetry = async (web3: Web3, contract: string) => {
 			return balance;
 		}
 
-		sleep(1 * 1000);
+		await sleep(1 * 1000);
 	}
 
 	return BigInt(0);

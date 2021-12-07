@@ -13,7 +13,7 @@ export const stakeTokens = async (web3: Web3, platform: Platform, tokenBalance: 
 
 export const unstakeTokens = async (web3: Web3, platform: Platform, tokenBalance: bigint) => {
 	const stakingContract = new web3.eth.Contract(stakingAbi as any, platform.stakingContract);
-	const methodSig = await stakingContract.methods.unstake(tokenBalance.toString(), false);
+	const methodSig = await stakingContract.methods.unstake(tokenBalance.toString(), true);
 
 	return await sendContractCall(web3, methodSig, platform.stakingContract);
 }

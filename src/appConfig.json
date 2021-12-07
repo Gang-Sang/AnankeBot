@@ -5,8 +5,8 @@
     "stableTokenAddress": "0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E",
     "stableNumOfDecimals": 18,
     "spookRouterAddress": "0xF491e7B69E4244ad4002BC14e878a34207E38c29",
-	"numOfBlockPreBuy": 300,
-	"numOfBlocksMin": 60,
+	"numOfBlockPreBuy": 120,
+	"numOfBlocksMin": 30,
 	"verbose": true,
     "testMode": false,
     "platforms": [
@@ -23,7 +23,7 @@
             "numberOfDecimals": 9,
 			"priceFloor": 100.00,
             "liquidityFloor": 13000000,
-            "positionSize": "12000",
+            "positionSize": "15000",
 			"enabled": true
         },
         { 
@@ -39,7 +39,7 @@
             "numberOfDecimals": 9,
 			"priceFloor": 120.00,
             "liquidityFloor": 1000000,
-            "positionSize": "8000",
+            "positionSize": "6500",
 			"enabled": true
         },
         { 
@@ -55,7 +55,7 @@
             "numberOfDecimals": 9,
 			"priceFloor": 600.00,
             "liquidityFloor": 400000,
-            "positionSize": "1500",
+            "positionSize": "1000",
 			"enabled": true
         },
         { 
@@ -69,9 +69,9 @@
             "stableReservePosition": 0,
             "tokenReservePosition": 1,
             "numberOfDecimals": 9,
-			"priceFloor": 300.00,
+			"priceFloor": 200.00,
             "liquidityFloor": 700000,
-            "positionSize": "3000",
+            "positionSize": "1000",
 			"enabled": true
         }
     ]
