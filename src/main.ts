@@ -27,7 +27,7 @@ export const mainProgramLoop = async () => {
 			const sleepTime = blockToSleepTill - currentBlock; //each block ~ 1sec
 
 			if (sleepTime < 30) {
-				await sleep(10 * 1000);
+				await sleep(5 * 1000);
 			} else {
 				log(`Next ${soonestPlatform.name} rebase on block ${soonestPlatform.endBlock}. current block-${currentBlock} wake up around block ${blockToSleepTill}. ~${sleepTime / 60} mins`);
 				await sleep(sleepTime * 1000);

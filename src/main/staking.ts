@@ -20,7 +20,8 @@ export const unstakeTokens = async (web3: Web3, platform: Platform, tokenBalance
 
 const getStakingMethodSig = async (web3: Web3, platform: Platform, tokenBalance: bigint) => {
 	switch (platform.id) {
-	case 2: {
+	case 2: 
+	case 5: {
 		const stakingHelperHec = new web3.eth.Contract(stakingHelperHecAbi as any, platform.stakingHelperContract);
 		return await stakingHelperHec.methods.stake(tokenBalance.toString(), config.publicKey);
 	}

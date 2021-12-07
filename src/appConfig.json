@@ -4,8 +4,8 @@
     "apiUrlBase": "https://rpc.ftm.tools/",
     "stableTokenAddress": "0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E",
     "stableNumOfDecimals": 18,
-	"numOfBlockPreBuy": 120,
-	"numOfBlocksMin": 30,
+	"numOfBlockPreBuy": 90,
+	"numOfBlocksMin": 20,
 	"verbose": true,
     "testMode": false,
     "platforms": [
@@ -40,7 +40,7 @@
             "numberOfDecimals": 9,
 			"priceFloor": 120.00,
             "liquidityFloor": 1000000,
-            "positionSize": "6500",
+            "positionSize": "7000",
 			"enabled": true
         },
         { 
@@ -57,7 +57,7 @@
             "numberOfDecimals": 9,
 			"priceFloor": 600.00,
             "liquidityFloor": 400000,
-            "positionSize": "1000",
+            "positionSize": "1500",
 			"enabled": true
         },
         { 
@@ -74,7 +74,7 @@
             "numberOfDecimals": 9,
 			"priceFloor": 200.00,
             "liquidityFloor": 700000,
-            "positionSize": "1000",
+            "positionSize": "1500",
 			"enabled": true
         },
 		{ 
